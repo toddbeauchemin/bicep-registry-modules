@@ -5,8 +5,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.43.8.12551",
-      "templateHash": "1287028176609138498"
+      "version": "0.42.1.51946",
+      "templateHash": "17536143300264072774"
     },
     "name": "Recovery Services Vault Backup Config",
     "description": "This module deploys a Recovery Services Vault Backup Config."
@@ -31,7 +31,8 @@
       "allowedValues": [
         "AlwaysON",
         "Disabled",
-        "Enabled"
+        "Enabled",
+        "Invalid"
       ],
       "metadata": {
         "description": "Optional. Enable this setting to protect hybrid backups against accidental deletes and add additional layer of authentication for critical operations."
@@ -50,7 +51,8 @@
       "allowedValues": [
         "AlwaysON",
         "Disabled",
-        "Enabled"
+        "Enabled",
+        "Invalid"
       ],
       "metadata": {
         "description": "Optional. Enable this setting to protect backup data for Azure VM, SQL Server in Azure VM and SAP HANA in Azure VM from accidental deletes."
@@ -95,9 +97,16 @@
     },
     "isSoftDeleteFeatureStateEditable": {
       "type": "bool",
-      "defaultValue": true,
+      "nullable": true,
       "metadata": {
         "description": "Optional. Is soft delete feature state editable."
+      }
+    },
+    "softDeleteRetentionPeriodInDays": {
+      "type": "int",
+      "nullable": true,
+      "metadata": {
+        "description": "Optional. Soft delete retention period in days."
       }
     },
     "enableTelemetry": {
@@ -132,22 +141,14 @@
     "rsv": {
       "existing": true,
       "type": "Microsoft.RecoveryServices/vaults",
-      "apiVersion": "2025-08-01",
+      "apiVersion": "2026-01-01",
       "name": "[parameters('recoveryVaultName')]"
     },
     "backupConfig": {
       "type": "Microsoft.RecoveryServices/vaults/backupconfig",
-      "apiVersion": "2025-08-01",
+      "apiVersion": "2026-01-01",
       "name": "[format('{0}/{1}', parameters('recoveryVaultName'), parameters('name'))]",
-      "properties": {
-        "enhancedSecurityState": "[parameters('enhancedSecurityState')]",
-        "resourceGuardOperationRequests": "[parameters('resourceGuardOperationRequests')]",
-        "softDeleteFeatureState": "[parameters('softDeleteFeatureState')]",
-        "storageModelType": "[parameters('storageModelType')]",
-        "storageType": "[parameters('storageType')]",
-        "storageTypeState": "[parameters('storageTypeState')]",
-        "isSoftDeleteFeatureStateEditable": "[parameters('isSoftDeleteFeatureStateEditable')]"
-      }
+      "properties": "[shallowMerge(createArray(createObject('resourceGuardOperationRequests', parameters('resourceGuardOperationRequests'), 'storageModelType', parameters('storageModelType'), 'storageType', parameters('storageType'), 'storageTypeState', parameters('storageTypeState')), if(not(equals(parameters('enhancedSecurityState'), null())), createObject('enhancedSecurityState', parameters('enhancedSecurityState')), createObject()), if(not(equals(parameters('softDeleteFeatureState'), null())), createObject('softDeleteFeatureState', parameters('softDeleteFeatureState')), createObject()), if(not(equals(parameters('isSoftDeleteFeatureStateEditable'), null())), createObject('isSoftDeleteFeatureStateEditable', parameters('isSoftDeleteFeatureStateEditable')), createObject()), if(not(equals(parameters('softDeleteRetentionPeriodInDays'), null())), createObject('softDeleteRetentionPeriodInDays', parameters('softDeleteRetentionPeriodInDays')), createObject())))]"
     }
   },
   "outputs": {
